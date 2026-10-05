@@ -1,0 +1,3 @@
+FINAL PRE-SUBMISSION CHECK (20 gates):
+1 journal scope 2 article type 3 word count 4 abstract 5 keywords 6 structure 7 references 8 figures 9 tables 10 ethics 11 conflicts 12 data 13 funding 14 author info 15 formatting 16 style 17 scientific consistency 18 citation consistency 19 unsupported claims 20 journal-specific.
+If any MANDATORY fails -> final_status NOT READY and block finalization. Emit JOURNAL READINESS REPORT.

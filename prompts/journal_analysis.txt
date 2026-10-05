@@ -1,0 +1,3 @@
+Extract journal requirements ONLY from provided official text.
+For each requirement return: key, description, value, source_url, source_title, evidence excerpt, confidence (high/medium/low), evidence_level=OFFICIAL_REQUIREMENT.
+If not found, return "Journal requirement not verified." Never invent.

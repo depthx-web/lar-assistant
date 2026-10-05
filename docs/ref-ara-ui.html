@@ -1,0 +1,941 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Academic Research Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: fixed app shell (top bar + collapsible sidebar + scrolling workspace); reading and writing screens use three panes: structure | document | AI + evidence. */
+:root{
+  --bg:#F5F6F9; --surface:#FFFFFF; --surface-2:#ECEFF4; --line:#DADFE8; --line-strong:#C3CAD8;
+  --ink:#1A2130; --ink-2:#465063; --ink-3:#6F7A8E;
+  --accent:#2A4A9C; --accent-ink:#FFFFFF; --accent-soft:#E4EBF9;
+  --ok:#1D7448; --ok-soft:#E0F2E8; --warn:#8F5B00; --warn-soft:#FAEFD6; --crit:#B0261F; --crit-soft:#FAE5E3;
+  --mark:#FFF0B8;
+  --ui:'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif;
+  --read:'Source Serif 4','IBM Plex Sans Arabic',Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --sbw:224px; --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10131A; --surface:#171B24; --surface-2:#1F2430; --line:#2A3142; --line-strong:#3A4358;
+  --ink:#E7EAF1; --ink-2:#AAB3C4; --ink-3:#7E8aa0;
+  --accent:#86A3EA; --accent-ink:#0E1424; --accent-soft:#20304F;
+  --ok:#62C792; --ok-soft:#163024; --warn:#E3B556; --warn-soft:#352A10; --crit:#F2897F; --crit-soft:#3B1D1B;
+  --mark:#4A3F12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10131A; --surface:#171B24; --surface-2:#1F2430; --line:#2A3142; --line-strong:#3A4358;
+  --ink:#E7EAF1; --ink-2:#AAB3C4; --ink-3:#7E8aa0;
+  --accent:#86A3EA; --accent-ink:#0E1424; --accent-soft:#20304F;
+  --ok:#62C792; --ok-soft:#163024; --warn:#E3B556; --warn-soft:#352A10; --crit:#F2897F; --crit-soft:#3B1D1B;
+  --mark:#4A3F12; color-scheme:dark}
+:root[lang="ar"]{--ui:'IBM Plex Sans Arabic','IBM Plex Sans',system-ui,sans-serif}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:13.5px;line-height:1.5;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+kbd{font-family:var(--mono);font-size:11px;padding:1px 5px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;color:var(--ink-2);background:var(--surface)}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+
+.shell{height:100%;display:grid;grid-template-rows:48px minmax(0,1fr)}
+.top{display:flex;align-items:center;gap:10px;padding-inline:12px 16px;background:var(--surface);border-bottom:1px solid var(--line);min-width:0}
+.iconbtn{display:inline-grid;place-items:center;width:32px;height:32px;border:0;background:transparent;border-radius:var(--r);color:var(--ink-2);position:relative;flex:none}
+.iconbtn:hover{background:var(--surface-2);color:var(--ink)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;white-space:nowrap}
+.mark{width:26px;height:26px;border-radius:6px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--read);font-size:17px;font-weight:600;line-height:1}
+.proj{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:4px 10px;height:30px;color:var(--ink-2);min-width:0}
+.proj b{color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
+.searchbtn{flex:1 1 280px;max-width:440px;margin-inline:auto;display:flex;align-items:center;gap:8px;height:32px;padding-inline:10px;border:1px solid var(--line);background:var(--bg);border-radius:var(--r);color:var(--ink-3);text-align:start;min-width:0}
+.searchbtn span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.searchbtn:hover{border-color:var(--line-strong)}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding-inline:10px;border:1px solid var(--line);border-radius:99px;font-size:12px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.dot.crit{background:var(--crit)} .dot.warn{background:var(--warn)}
+.pill.statusbtn{cursor:pointer}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:12px;flex:none}
+.bell .n{position:absolute;top:4px;inset-inline-end:3px;min-width:15px;height:15px;border-radius:8px;background:var(--crit);color:#fff;font-size:10px;display:grid;place-items:center;padding-inline:3px;font-weight:600}
+.sample{font-size:11px;padding:1px 7px;border-radius:99px;border:1px dashed var(--line-strong);color:var(--ink-3);white-space:nowrap}
+
+.body{display:grid;grid-template-columns:var(--sbw) minmax(0,1fr);min-height:0}
+.side{background:var(--surface);border-inline-end:1px solid var(--line);display:flex;flex-direction:column;padding:12px 8px;gap:2px;overflow:auto;min-width:0}
+.sec-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:10px 10px 6px;font-weight:600}
+[lang="ar"] .sec-label,[lang="ar"] .h-label{letter-spacing:0}
+.nav{display:flex;align-items:center;gap:10px;height:34px;padding-inline:10px;border:0;background:transparent;border-radius:var(--r);color:var(--ink-2);text-align:start;width:100%;position:relative}
+.nav:hover{background:var(--surface-2);color:var(--ink)}
+.nav[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav[aria-current="page"]::before{content:"";position:absolute;inset-inline-start:-8px;top:7px;bottom:7px;width:3px;border-radius:2px;background:var(--accent)}
+.nav .lbl{flex:1;white-space:nowrap}
+.nav .cnt{font-size:11px;padding:0 6px;border-radius:9px;background:var(--surface-2);color:var(--ink-2);font-family:var(--mono)}
+.nav .cnt.crit{background:var(--crit-soft);color:var(--crit)}
+.side .grow{flex:1}
+.collapsed{--sbw:56px}
+.collapsed .lbl,.collapsed .cnt,.collapsed .sec-label{display:none}
+.collapsed .nav{justify-content:center;padding-inline:0}
+.collapsed .nav[aria-current="page"]::before{inset-inline-start:-8px}
+.main{overflow:auto;min-width:0;min-height:0}
+
+.screen{padding:22px 28px 56px;max-width:1320px;margin-inline:auto}
+.screen[hidden]{display:none}
+.screen.panes{padding:0;max-width:none;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+.screen.panes[hidden]{display:none}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.pagehead h1{font-family:var(--read);font-size:26px;font-weight:600;line-height:1.2;text-wrap:balance}
+.pagehead .sub{color:var(--ink-2);margin-top:4px}
+.h-label{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--ink-3)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding-inline:11px;border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--r);color:var(--ink);font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{height:26px;padding-inline:8px;font-size:12.5px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.ok{color:var(--ok);border-color:var(--ok)} .btn.bad{color:var(--crit);border-color:var(--line-strong)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;height:20px;padding-inline:7px;border-radius:4px;font-size:11.5px;font-weight:500;white-space:nowrap;border:1px solid transparent}
+.b-ok{background:var(--ok-soft);color:var(--ok)} .b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-crit{background:var(--crit-soft);color:var(--crit)} .b-info{background:var(--accent-soft);color:var(--accent)}
+.b-mute{background:var(--surface-2);color:var(--ink-2)}
+.b-official{background:var(--accent);color:var(--accent-ink)}
+.b-observed{border-color:var(--line-strong);color:var(--ink-2);background:transparent}
+.b-model{border:1px dashed var(--accent);color:var(--accent);background:transparent}
+.badge svg.i{width:12px;height:12px}
+.tag{font-size:11.5px;padding:1px 7px;border-radius:99px;background:var(--surface-2);color:var(--ink-2)}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.box>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.box>header h2{font-size:13px;font-weight:600}
+.box .in{padding:6px 14px 10px}
+.row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .grow{flex:1;min-width:0}
+.row .tt{font-weight:500}
+.sev{width:3px;align-self:stretch;border-radius:2px;flex:none}
+.sev.blocking{background:var(--crit)} .sev.critical{background:var(--warn)} .sev.warning{background:var(--ink-3)} .sev.suggestion{background:var(--accent)}
+
+.stats{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:18px}
+.stat{flex:1 1 140px;padding:12px 18px;border-inline-end:1px solid var(--line)}
+.stat:last-child{border-inline-end:0}
+.stat b{display:block;font-family:var(--read);font-size:26px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--ink-2);font-size:12.5px}
+
+.flow{display:flex;gap:0;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;list-style:none;padding-inline:0;margin-top:0}
+.flow li{flex:1 0 128px;position:relative;padding:10px 12px 10px 0;min-width:0}
+[dir="rtl"] .flow li{padding:10px 0 10px 12px}
+.flow li::before{content:"";display:block;height:3px;border-radius:2px;background:var(--line-strong);margin-bottom:8px}
+.flow li.done::before{background:var(--ok)} .flow li.now::before{background:var(--accent);height:4px}
+.flow .st{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:4px}
+.flow li.done .st{color:var(--ok)} .flow li.now .st{color:var(--accent);font-weight:600}
+.flow .nm{font-weight:500;line-height:1.3}
+.flow li.next .nm{color:var(--ink-2)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+.prog{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.prog.ok>i{background:var(--ok)} .prog.warn>i{background:var(--warn)} .prog.crit>i{background:var(--crit)}
+.kv{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .s{display:inline-flex;align-items:center;gap:7px;color:var(--ink-2)}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.field{height:30px;border:1px solid var(--line-strong);border-radius:var(--r);background:var(--surface);padding-inline:10px;min-width:0}
+.field.srch{flex:1 1 240px;max-width:360px}
+select.field{padding-inline:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:28px;padding-inline:11px;border:1px solid var(--line);background:var(--surface);border-radius:99px;color:var(--ink-2);font-size:12.5px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.drop{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px dashed var(--line-strong);border-radius:8px;color:var(--ink-2);margin-bottom:14px;background:var(--surface)}
+.drop b{color:var(--ink);font-weight:500}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);text-align:start;font-weight:600;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+[lang="ar"] th{letter-spacing:0}
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{color:var(--ink)}
+th[aria-sort="ascending"]::after{content:" ↑"} th[aria-sort="descending"]::after{content:" ↓"}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.clk{cursor:pointer} tbody tr.clk:hover{background:var(--bg)}
+td .ttl{font-weight:500;color:var(--ink)}
+td .au{color:var(--ink-2);font-size:12.5px}
+.pager{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:var(--ink-2);font-size:12.5px;border-top:1px solid var(--line)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;background:transparent;padding:9px 12px;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabgroup>[data-pane][hidden]{display:none}
+
+/* three-pane screens */
+.dochead{padding:14px 20px 12px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap;align-items:flex-start}
+.dochead h1{font-family:var(--read);font-size:19px;font-weight:600;line-height:1.3;text-wrap:balance;max-width:820px}
+.meta{display:flex;gap:6px 14px;flex-wrap:wrap;color:var(--ink-2);font-size:12.5px;margin-top:3px}
+.meta .sep{color:var(--line-strong)}
+.pbody{display:grid;grid-template-columns:200px minmax(0,1fr) 352px;min-height:0}
+.pane{overflow:auto;min-width:0;min-height:0}
+.pane.l{background:var(--surface);border-inline-end:1px solid var(--line);padding:12px 8px}
+.pane.r{background:var(--surface);border-inline-start:1px solid var(--line);display:flex;flex-direction:column}
+.pane.c{background:var(--bg)}
+.outline button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;text-align:start;padding:6px 10px;border-radius:var(--r);color:var(--ink-2)}
+.outline button:hover{background:var(--surface-2)}
+.outline button[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.outline .pg{margin-inline-start:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.outline .pip{width:7px;height:7px;border-radius:50%;margin-inline-start:auto;background:var(--crit)}
+.outline .pip.w{background:var(--warn)}
+
+.page{max-width:720px;margin:22px auto;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:34px 44px 40px;font-family:var(--read);font-size:16.5px;line-height:1.7;position:relative}
+.page h3{font-size:20px;font-weight:600;margin-bottom:10px;font-family:var(--read)}
+.page .lead{font-size:12px;font-family:var(--mono);color:var(--ink-3);margin-bottom:16px;letter-spacing:.02em}
+.page p{margin-bottom:14px}
+.page mark{background:var(--mark);color:inherit;padding:1px 0;border-radius:2px}
+.cite{font-family:var(--ui);font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:3px;padding:0 4px;white-space:nowrap}
+.selbar{position:absolute;inset-inline-start:44px;transform:translateY(-8px);display:flex;gap:2px;padding:3px;background:var(--ink);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.25);font-family:var(--ui);font-size:12.5px;z-index:2}
+.selbar button{border:0;background:transparent;color:var(--bg);padding:4px 9px;border-radius:4px}
+.selbar button:hover{background:rgba(255,255,255,.16)}
+.unsup{background:var(--warn-soft);border-bottom:2px dotted var(--warn)}
+
+.aihead{padding:12px 14px;border-bottom:1px solid var(--line);flex:none}
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:8px}
+.scope label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);padding:2px 0;cursor:pointer}
+.scope input{accent-color:var(--accent);margin:0}
+.thread{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.q{align-self:flex-end;max-width:92%;background:var(--accent-soft);color:var(--ink);padding:8px 12px;border-radius:10px 10px 2px 10px}
+[dir="rtl"] .q{border-radius:10px 10px 10px 2px}
+.ans p{margin-bottom:8px}
+.ans .tools{display:flex;gap:2px;margin-top:2px}
+.evi{border:1px solid var(--line);border-radius:6px;padding:9px 10px;background:var(--bg);margin-top:8px}
+.evi dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px}
+.evi dt{color:var(--ink-3)} .evi dd{margin:0}
+.evi .note{margin-top:6px;font-size:12.5px;color:var(--ink-2)}
+.composer{border-top:1px solid var(--line);padding:10px 14px 12px;flex:none}
+.composer .qa{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.composer .qa .chip{height:24px;font-size:12px;padding-inline:9px}
+.inbox{display:flex;gap:6px;align-items:flex-end}
+.inbox textarea{flex:1;resize:none;border:1px solid var(--line-strong);border-radius:var(--r);background:var(--surface);padding:7px 10px;min-height:56px;min-width:0}
+
+/* manuscript */
+.edtool{display:flex;gap:2px;align-items:center;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:3}
+.edtool .sepv{width:1px;height:18px;background:var(--line);margin-inline:6px}
+.edtool .saved{margin-inline-start:auto;font-size:12px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.edtool select{height:28px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding-inline:6px}
+.sugg{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:12px 14px}
+.sugg .blk{padding:9px 12px;font-size:13px}
+.sugg .blk+.blk{border-top:1px solid var(--line)}
+.sugg .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--ink-3);display:block;margin-bottom:3px}
+[lang="ar"] .sugg .lab{letter-spacing:0}
+.sugg del{color:var(--crit);text-decoration-thickness:1px}
+.sugg ins{background:var(--ok-soft);color:var(--ink);text-decoration:none;border-radius:2px}
+.sugg .foot{display:flex;gap:6px;padding:8px 12px;background:var(--bg);border-top:1px solid var(--line);align-items:center}
+.sugg.done{opacity:.8}
+.paneBody{overflow:auto;flex:1;min-height:0}
+
+/* compliance */
+.gate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:18px}
+.gate>div{padding:16px 20px}
+.gate>div+div{border-inline-start:1px solid var(--line)}
+.verdict{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:6px;font-weight:600;letter-spacing:.06em;font-size:15px;margin-top:6px}
+.verdict.no{background:var(--crit-soft);color:var(--crit);border:1.5px solid var(--crit)}
+.chk{list-style:none;margin:8px 0 0;padding:0}
+.chk li{display:flex;gap:8px;align-items:center;padding:4px 0}
+.chk .ok{color:var(--ok)} .chk .no{color:var(--crit)}
+.meter{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 48px;gap:10px;align-items:center;padding:5px 0}
+.meter .v{font-family:var(--mono);font-size:12px;text-align:end;color:var(--ink-2)}
+details.issue{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:8px;overflow:hidden}
+details.issue summary{display:flex;gap:10px;align-items:center;padding:10px 12px;cursor:pointer;list-style:none}
+details.issue summary::-webkit-details-marker{display:none}
+details.issue summary .ch{transition:transform .12s;margin-inline-start:auto;color:var(--ink-3)}
+details[open].issue summary .ch{transform:rotate(90deg)}
+details.issue .dd{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;padding:4px 14px 14px;border-top:1px solid var(--line);padding-top:12px}
+details.issue .dd dt{color:var(--ink-3)} details.issue .dd dd{margin:0}
+.group-h{display:flex;align-items:center;gap:8px;margin:18px 0 8px}
+.legend{display:flex;gap:16px 24px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:12px;color:var(--ink-2);font-size:12.5px}
+.legend div{display:flex;gap:8px;align-items:center}
+
+.alert{display:flex;gap:10px;padding:12px 14px;border-radius:8px;border:1px solid var(--crit);background:var(--crit-soft);margin-bottom:16px}
+.alert[hidden]{display:none}
+.alert h3{font-size:14px;color:var(--crit);margin-bottom:2px}
+
+.scrim{position:fixed;inset:0;background:rgba(10,14,22,.5);display:flex;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;z-index:50}
+.scrim[hidden]{display:none}
+.pal{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+.pal input{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:14px 16px;font-size:15px;outline:none}
+.pal ul{list-style:none;margin:0;padding:6px;max-height:320px;overflow:auto}
+.pal li button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;text-align:start;padding:8px 10px;border-radius:6px}
+.pal li button:hover,.pal li button.act{background:var(--accent-soft);color:var(--accent)}
+.pal .hint{padding:8px 14px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12px;display:flex;gap:12px}
+.toast{position:fixed;bottom:18px;inset-inline-start:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+[dir="rtl"] .toast{transform:translateX(50%)}
+.toast[hidden]{display:none}
+.skel{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--surface-2),var(--line),var(--surface-2));background-size:200% 100%;animation:sk 1.4s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}details.issue summary .ch{transition:none}}
+
+@media (max-width:1180px){.pbody{grid-template-columns:180px minmax(0,1fr) 320px}.grid2{grid-template-columns:1fr}.top .model,.top .proj{display:none}}
+@media (max-width:900px){
+  .body{grid-template-columns:56px minmax(0,1fr)}
+  .side .lbl,.side .cnt,.side .sec-label{display:none}.side .nav{justify-content:center;padding-inline:0}
+  .brand .nm,.top .statusbtn .tx,.top .sample{display:none}
+  .screen{padding:16px 16px 48px}
+  .screen.panes{height:auto;display:block}
+  .pbody{display:block}
+  .pane{overflow:visible}
+  .pane.l{border-inline-end:0;border-bottom:1px solid var(--line)}
+  .pane.r{border-inline-start:0;border-top:1px solid var(--line)}
+  .page{margin:14px 16px;padding:22px 20px}
+  .gate{grid-template-columns:1fr}.gate>div+div{border-inline-start:0;border-top:1px solid var(--line)}
+  .meter{grid-template-columns:1fr 1fr 40px}
+  details.issue .dd{grid-template-columns:1fr}
+  .searchbtn kbd{display:none}
+  .thread{max-height:none}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-dash" viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v5h-8zM13 11h8v10h-8zM3 13h8v8H3z"/></symbol>
+<symbol id="i-paper" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7"/></symbol>
+<symbol id="i-journal" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/></symbol>
+<symbol id="i-report" viewBox="0 0 24 24"><path d="M5 20V4M5 20h15M9 16v-5M13 16V8M17 16v-3"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><path d="M7 7h10v10H7zM10 10h4v4h-4zM9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
+<symbol id="i-panel" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 8H5V4M5 8a8 8 0 1 1-1 6"/></symbol>
+<symbol id="i-cite" viewBox="0 0 24 24"><path d="M9 5H6v14h3M15 5h3v14h-3"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4M12 17v.5"/></symbol>
+<symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 10h18M9 5v14"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h11v12H8zM5 16V4h11"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 5v5h-5M4 19v-5h5M19 10a7 7 0 0 0-12-3M5 14a7 7 0 0 0 12 3"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-7z"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+</svg>
+
+<div class="shell" id="shell">
+<header class="top">
+  <button class="iconbtn" id="sbToggle" aria-label="Toggle sidebar" title="Toggle sidebar"><svg class="i"><use href="#i-panel"/></svg></button>
+  <div class="brand"><span class="mark" aria-hidden="true">§</span><span class="nm t">Academic Research Assistant</span></div>
+  <button class="proj" aria-label="Current project"><span class="faint t">Project</span><b>Hippocampal atrophy in MCI</b><svg class="i"><use href="#i-down"/></svg></button>
+  <button class="searchbtn" id="openPal"><svg class="i"><use href="#i-search"/></svg><span class="t">Search papers, journals, manuscripts…</span><kbd>Ctrl K</kbd></button>
+  <span class="pill model" id="modelPill" title="Active AI model"><svg class="i"><use href="#i-spark"/></svg><span class="mono" id="modelTx">qwen2.5:14b</span></span>
+  <button class="pill statusbtn" id="statusBtn" data-go="models" title="System status"><span class="dot" id="statusDot"></span><span class="tx t" id="statusTx">All systems ready</span></button>
+  <span class="sample t">Mockup · sample data</span>
+  <button class="iconbtn" id="langBtn" aria-label="Language" title="English / العربية"><svg class="i"><use href="#i-globe"/></svg></button>
+  <button class="iconbtn" id="themeBtn" aria-label="Theme" title="Light / Dark / System"><svg class="i"><use href="#i-sun"/></svg></button>
+  <button class="iconbtn bell" aria-label="Notifications" title="Notifications"><svg class="i"><use href="#i-bell"/></svg><span class="n">3</span></button>
+  <span class="avatar" title="Account">MR</span>
+</header>
+
+<div class="body">
+<nav class="side" aria-label="Main">
+  <div class="sec-label t">Workspace</div>
+  <button class="nav" data-go="dashboard" title="Dashboard"><svg class="i"><use href="#i-dash"/></svg><span class="lbl t">Dashboard</span></button>
+  <button class="nav" data-go="papers" title="Papers"><svg class="i"><use href="#i-paper"/></svg><span class="lbl t">Papers</span><span class="cnt">12</span></button>
+  <button class="nav" data-go="journals" title="Journals"><svg class="i"><use href="#i-journal"/></svg><span class="lbl t">Journals</span><span class="cnt">4</span></button>
+  <button class="nav" data-go="manuscript" title="Manuscripts"><svg class="i"><use href="#i-edit"/></svg><span class="lbl t">Manuscripts</span><span class="cnt">2</span></button>
+  <div class="sec-label t">Review</div>
+  <button class="nav" data-go="compliance" title="Compliance"><svg class="i"><use href="#i-shield"/></svg><span class="lbl t">Compliance</span><span class="cnt crit">2</span></button>
+  <button class="nav" data-go="reports" title="Reports"><svg class="i"><use href="#i-report"/></svg><span class="lbl t">Reports</span></button>
+  <div class="grow"></div>
+  <button class="nav" data-go="models" title="Models &amp; System"><svg class="i"><use href="#i-cpu"/></svg><span class="lbl t">Models &amp; System</span></button>
+</nav>
+
+<main class="main" id="main">
+
+<!-- DASHBOARD -->
+<section class="screen" id="s-dashboard" aria-labelledby="h-dashboard">
+  <div class="pagehead">
+    <div><h1 id="h-dashboard" class="t">Research Overview</h1><p class="sub t">What is happening in your project right now</p></div>
+    <div class="actions"><button class="btn" data-go="papers"><svg class="i"><use href="#i-upload"/></svg><span class="t">Upload paper</span></button><button class="btn pri" data-go="manuscript"><svg class="i"><use href="#i-edit"/></svg><span class="t">Continue writing</span></button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>3</b><span class="t">Active projects</span></div>
+    <div class="stat"><b>12</b><span class="t">Papers</span></div>
+    <div class="stat"><b>2</b><span class="t">Manuscripts</span></div>
+    <div class="stat"><b>4</b><span class="t">Journal profiles</span></div>
+  </div>
+  <ol class="flow" aria-label="Research workflow">
+    <li class="done"><div class="st"><svg class="i"><use href="#i-check"/></svg><span class="t">Done</span></div><div class="nm t">Import papers</div></li>
+    <li class="done"><div class="st"><svg class="i"><use href="#i-check"/></svg><span class="t">Done</span></div><div class="nm t">Build knowledge base</div></li>
+    <li class="done"><div class="st"><svg class="i"><use href="#i-check"/></svg><span class="t">Done</span></div><div class="nm t">Ask the literature</div></li>
+    <li class="now" aria-current="step"><div class="st"><span class="t">In progress</span></div><div class="nm t">Write manuscript</div></li>
+    <li class="next"><div class="st"><span class="t">Next</span></div><div class="nm t">Check journal fit</div></li>
+    <li class="next"><div class="st"><span class="t">Next</span></div><div class="nm t">Final submission review</div></li>
+  </ol>
+  <div class="grid2">
+    <div class="stack">
+      <section class="box"><header><h2 class="t">Attention required</h2><button class="btn ghost sm" data-go="compliance"><span class="t">Open compliance</span><svg class="i flip"><use href="#i-chev"/></svg></button></header>
+        <div class="in">
+          <div class="row"><span class="sev blocking"></span><div class="grow"><div class="tt t">Structured Methods section is missing</div><div class="faint">Manuscript: Hippocampal atrophy rates · Methods</div></div><span class="badge b-crit t">Blocking</span></div>
+          <div class="row"><span class="sev critical"></span><div class="grow"><div class="tt t">2 unsupported claims in the Discussion</div><div class="faint">No direct evidence in the knowledge base</div></div><span class="badge b-warn t">Critical</span></div>
+          <div class="row"><span class="sev warning"></span><div class="grow"><div class="tt t">1 missing citation in the Introduction</div><div class="faint">Paragraph 3 · Sentence 2</div></div><span class="badge b-mute t">Warning</span></div>
+          <div class="row"><span class="sev warning"></span><div class="grow"><div class="tt t">Journal profile needs verification</div><div class="faint">Journal of Applied Neuroimaging · last verified 94 days ago</div></div><span class="badge b-mute t">Warning</span></div>
+        </div></section>
+      <section class="box"><header><h2 class="t">Recent papers</h2><button class="btn ghost sm" data-go="papers"><span class="t">All papers</span><svg class="i flip"><use href="#i-chev"/></svg></button></header>
+        <div class="in">
+          <div class="row"><svg class="i faint"><use href="#i-paper"/></svg><div class="grow"><div class="tt">Longitudinal hippocampal volume change in mild cognitive impairment</div><div class="faint">Haddad, Lindqvist, Okafor · 2023</div></div><span class="badge b-ok t">Ready</span></div>
+          <div class="row"><svg class="i faint"><use href="#i-paper"/></svg><div class="grow"><div class="tt">APOE ε4 status and rate of memory decline: a multi-site cohort</div><div class="faint">Varga, Nakamura · 2022</div></div><span class="badge b-info t">Processing</span></div>
+          <div class="row"><svg class="i faint"><use href="#i-paper"/></svg><div class="grow"><div class="tt">Segmentation reliability across 3T scanner vendors</div><div class="faint">Brandt, Osei, Tran · 2021</div></div><span class="badge b-ok t">Ready</span></div>
+        </div></section>
+      <section class="box"><header><h2 class="t">Recent activity</h2></header>
+        <div class="in">
+          <div class="row"><div class="grow t">Paper imported</div><span class="faint">12 min</span></div>
+          <div class="row"><div class="grow t">PDF processed</div><span class="faint">48 min</span></div>
+          <div class="row"><div class="grow t">Manuscript analyzed</div><span class="faint">Yesterday</span></div>
+          <div class="row"><div class="grow t">Journal requirements updated</div><span class="faint">2 days</span></div>
+        </div></section>
+    </div>
+    <div class="stack">
+      <section class="box"><header><h2 class="t">Processing queue</h2></header>
+        <div class="in">
+          <div class="row"><div class="grow"><div class="tt">Varga &amp; Nakamura 2022</div><div class="prog" style="margin:6px 0 3px"><i style="width:80%"></i></div><div class="faint"><span class="t">Extracting sections</span> · 80%</div></div></div>
+          <div class="row"><div class="grow"><div class="tt">Brandt et al. 2021 (scan)</div><div class="prog" style="margin:6px 0 3px"><i style="width:40%"></i></div><div class="faint"><span class="t">Generating embeddings</span> · 40%</div></div></div>
+          <div class="row"><div class="grow"><div class="tt">Haddad et al. 2023</div></div><span class="badge b-ok"><svg class="i"><use href="#i-check"/></svg><span class="t">Completed</span></span></div>
+        </div></section>
+      <section class="box"><header><h2 class="t">System status</h2><button class="btn ghost sm" data-go="models"><span class="t">Details</span></button></header>
+        <div class="in">
+          <div class="kv"><span class="t">Backend</span><span class="s"><i class="dot"></i><span class="t">Online</span></span></div>
+          <div class="kv"><span class="t">Database</span><span class="s"><i class="dot"></i><span class="t">Connected</span></span></div>
+          <div class="kv"><span>Ollama</span><span class="s"><i class="dot dyn-ollama"></i><span class="t dyn-ollama-tx">Connected</span></span></div>
+          <div class="kv"><span class="t">Vector DB</span><span class="s"><i class="dot"></i><span class="t">Ready</span></span></div>
+        </div></section>
+      <section class="box"><header><h2 class="t">AI model status</h2></header>
+        <div class="in">
+          <div class="kv"><span class="t">Academic writing</span><span class="mono">qwen2.5:14b</span></div>
+          <div class="kv"><span class="t">Embeddings</span><span class="mono">nomic-embed-text</span></div>
+          <div class="kv"><span class="t">Journal evaluation</span><span class="mono">qwen2.5:14b</span></div>
+        </div></section>
+    </div>
+  </div>
+</section>
+
+<!-- PAPERS -->
+<section class="screen" id="s-papers" aria-labelledby="h-papers" hidden>
+  <div class="pagehead">
+    <div><h1 id="h-papers" class="t">Papers</h1><p class="sub t">Your research library</p></div>
+    <div class="actions"><button class="btn"><svg class="i"><use href="#i-cite"/></svg><span class="t">Import from URL</span></button><button class="btn pri"><svg class="i"><use href="#i-upload"/></svg><span class="t">Upload PDF</span></button></div>
+  </div>
+  <div class="drop"><svg class="i"><use href="#i-upload"/></svg><div><b class="t">Drop PDF files here</b> <span class="t">or use Upload PDF. Text, sections and embeddings are prepared automatically.</span></div></div>
+  <div class="toolbar">
+    <input class="field srch" id="paperSearch" type="search" placeholder="Search title, author, DOI" data-p="Search title, author, DOI" aria-label="Search papers">
+    <div class="chips" role="group" aria-label="Filter">
+      <button class="chip t" data-f="all" aria-pressed="true">All</button>
+      <button class="chip t" data-f="ready" aria-pressed="false">Ready</button>
+      <button class="chip t" data-f="proc" aria-pressed="false">Processing</button>
+      <button class="chip t" data-f="fail" aria-pressed="false">Needs attention</button>
+    </div>
+  </div>
+  <div class="tbl"><table id="paperTbl">
+    <thead><tr><th data-sort="0" class="t">Title</th><th data-sort="1" class="t">Year</th><th data-sort="2" class="t">Journal</th><th class="t">DOI</th><th class="t">Tags</th><th data-sort="5" class="t">Status</th><th></th></tr></thead>
+    <tbody>
+      <tr class="clk" data-status="ready" data-go="viewer"><td><div class="ttl">Longitudinal hippocampal volume change in mild cognitive impairment</div><div class="au">Haddad, Lindqvist, Okafor</div></td><td class="mono">2023</td><td>Journal of Applied Neuroimaging</td><td class="mono">10.5555/jan.2023.0412</td><td><span class="tag">MRI</span> <span class="tag">cohort</span></td><td><span class="badge b-ok t">Ready</span></td><td><button class="btn sm"><svg class="i"><use href="#i-spark"/></svg><span class="t">Analyze</span></button></td></tr>
+      <tr class="clk" data-status="proc" data-go="viewer"><td><div class="ttl">APOE ε4 status and rate of memory decline: a multi-site cohort</div><div class="au">Varga, Nakamura</div></td><td class="mono">2022</td><td>Clinical Cognitive Neuroscience</td><td class="mono">10.5555/ccn.2022.0187</td><td><span class="tag">genetics</span></td><td><span class="badge b-info t">Processing</span><div class="prog" style="width:96px;margin-top:5px"><i style="width:80%"></i></div></td><td></td></tr>
+      <tr class="clk" data-status="ready" data-go="viewer"><td><div class="ttl">Segmentation reliability across 3T scanner vendors</div><div class="au">Brandt, Osei, Tran</div></td><td class="mono">2021</td><td>Journal of Applied Neuroimaging</td><td class="mono">10.5555/jan.2021.0098</td><td><span class="tag">methods</span> <span class="tag">MRI</span></td><td><span class="badge b-ok t">Ready</span></td><td><button class="btn sm"><svg class="i"><use href="#i-spark"/></svg><span class="t">Analyze</span></button></td></tr>
+      <tr class="clk" data-status="fail" data-go="viewer"><td><div class="ttl">Cerebrospinal biomarkers and early structural change</div><div class="au">Idowu, Petrov</div></td><td class="mono">2020</td><td>Brain &amp; Behaviour Imaging</td><td class="mono">10.5555/bbi.2020.0331</td><td><span class="tag">biomarkers</span></td><td><span class="badge b-crit"><svg class="i"><use href="#i-alert"/></svg><span class="t">Failed</span></span></td><td><button class="btn sm"><svg class="i"><use href="#i-refresh"/></svg><span class="t">Retry</span></button></td></tr>
+      <tr class="clk" data-status="ready" data-go="viewer"><td><div class="ttl">Cognitive reserve moderates structural decline in older adults</div><div class="au">Svensson, Adeyemi</div></td><td class="mono">2019</td><td>Clinical Cognitive Neuroscience</td><td class="mono">10.5555/ccn.2019.0054</td><td><span class="tag">reserve</span></td><td><span class="badge b-ok t">Ready</span></td><td><button class="btn sm"><svg class="i"><use href="#i-spark"/></svg><span class="t">Analyze</span></button></td></tr>
+    </tbody></table>
+    <div class="pager"><span>1–5 / 12</span><span class="actions"><button class="btn sm" disabled>‹</button><button class="btn sm">›</button></span></div>
+  </div>
+</section>
+
+<!-- PAPER VIEWER -->
+<section class="screen panes" id="s-viewer" aria-labelledby="h-viewer" hidden>
+  <div class="dochead">
+    <div><button class="btn ghost sm" data-go="papers" style="margin-inline-start:-8px"><svg class="i flip"><use href="#i-back"/></svg><span class="t">Papers</span></button>
+      <h1 id="h-viewer">Longitudinal hippocampal volume change in mild cognitive impairment</h1>
+      <div class="meta"><span>Haddad, Lindqvist, Okafor</span><span class="sep">|</span><span>Journal of Applied Neuroimaging</span><span class="sep">|</span><span>2023</span><span class="sep">|</span><span class="mono">10.5555/jan.2023.0412</span></div></div>
+    <div class="actions"><span class="badge b-ok t">Ready</span><button class="btn"><svg class="i"><use href="#i-search"/></svg><span class="t">Find in paper</span></button><button class="btn"><span class="t">Summarize</span></button></div>
+  </div>
+  <div class="pbody">
+    <div class="pane l outline" role="navigation" aria-label="Sections">
+      <div class="h-label" style="padding:4px 10px 8px"><span class="t">Sections</span></div>
+      <button><span class="t">Abstract</span><span class="pg">1</span></button>
+      <button><span class="t">Introduction</span><span class="pg">2</span></button>
+      <button aria-current="true"><span class="t">Methods</span><span class="pg">5</span></button>
+      <button><span class="t">Results</span><span class="pg">8</span></button>
+      <button><span class="t">Discussion</span><span class="pg">11</span></button>
+      <button><span class="t">References</span><span class="pg">14</span></button>
+    </div>
+    <div class="pane c">
+      <article class="page">
+        <div class="lead">PAGE 7 · <span class="t">Methods</span></div>
+        <h3>2.3 Image acquisition</h3>
+        <p>All participants were scanned on 3T systems using a T1-weighted magnetization-prepared sequence. <mark>Acquisition used a 1 mm isotropic voxel size, a repetition time of 2300 ms and an echo time of 2.98 ms</mark> at each of the four sites <span class="cite">[4]</span>.</p>
+        <div class="selbar" role="toolbar" aria-label="Selection actions"><button class="t">Ask AI</button><button class="t">Summarize</button><button class="t">Add to notes</button></div>
+        <p>Scans were visually inspected for motion artefacts before processing. Cortical and subcortical volumes were estimated with an automated pipeline, and hippocampal volumes were normalised to total intracranial volume <span class="cite">[7]</span>.</p>
+        <p>Follow-up scans were acquired at 12 and 24 months. Participants with fewer than two usable scans were excluded from the longitudinal analysis.</p>
+      </article>
+    </div>
+    <aside class="pane r" aria-label="AI assistant">
+      <div class="aihead"><div class="h-label"><span class="t">Ask about</span></div>
+        <div class="scope" role="radiogroup" aria-label="Scope">
+          <label><input type="radio" name="sc1" checked><span class="t">Current paper</span></label>
+          <label><input type="radio" name="sc1"><span class="t">Selected papers</span></label>
+          <label><input type="radio" name="sc1"><span class="t">Current journal</span></label>
+          <label><input type="radio" name="sc1"><span class="t">Current manuscript</span></label>
+          <label><input type="radio" name="sc1"><span class="t">Entire knowledge base</span></label>
+          <label><input type="radio" name="sc1"><span class="t">General AI</span></label>
+        </div></div>
+      <div class="thread">
+        <div class="q">What was the MRI acquisition protocol, and which software processed the scans?</div>
+        <div class="ans">
+          <p>The scans were T1-weighted on 3T scanners with 1 mm isotropic voxels, TR 2300 ms and TE 2.98 ms <span class="cite">[1]</span>. The paper does not name the processing software <span class="cite">[2]</span>.</p>
+          <div class="evi"><span class="badge b-ok"><svg class="i"><use href="#i-check"/></svg><span class="t">Direct evidence</span></span>
+            <dl><dt class="t">Paper</dt><dd>Haddad et al. 2023</dd><dt class="t">Page</dt><dd class="mono">7</dd><dt class="t">Section</dt><dd class="t">Methods</dd></dl></div>
+          <div class="evi"><span class="badge b-warn"><svg class="i"><use href="#i-alert"/></svg><span class="t">Inference</span></span>
+            <div class="note t">The pipeline resembles common surface-based tools, but the paper never states which one. Treat this as a guess, not a finding.</div></div>
+          <div class="tools"><button class="btn ghost sm"><svg class="i"><use href="#i-copy"/></svg><span class="t">Copy</span></button><button class="btn ghost sm"><svg class="i"><use href="#i-refresh"/></svg><span class="t">Regenerate</span></button></div>
+        </div>
+      </div>
+      <div class="composer">
+        <div class="qa"><button class="chip t">Summarize</button><button class="chip t">Extract results</button><button class="chip t">Extract methodology</button><button class="chip t">Extract limitations</button></div>
+        <div class="inbox"><textarea id="aiInput1" placeholder="Ask about this paper" data-p="Ask about this paper" aria-label="Ask about this paper"></textarea><button class="btn pri" aria-label="Send"><svg class="i"><use href="#i-send"/></svg></button></div>
+        <div class="faint" style="margin-top:6px;font-size:12px"><kbd>Ctrl /</kbd> <span class="t">Focus AI assistant</span></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- JOURNALS -->
+<section class="screen" id="s-journals" aria-labelledby="h-journals" hidden>
+  <div class="pagehead">
+    <div><h1 id="h-journals">Journal of Applied Neuroimaging</h1>
+      <div class="meta"><span>Meridian Academic Press</span><span class="sep">|</span><span>ISSN <span class="mono">2398-0000</span></span><span class="sep">|</span><span><span class="t">Last verified</span> 12 Sep 2026</span></div></div>
+    <div class="actions"><select class="field" aria-label="Journal"><option>Journal of Applied Neuroimaging</option><option>Brain &amp; Behaviour Imaging</option><option>Clinical Cognitive Neuroscience</option></select><button class="btn pri"><svg class="i"><use href="#i-refresh"/></svg><span class="t">Re-verify sources</span></button></div>
+  </div>
+  <div class="tabgroup">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="ov" aria-selected="false" class="t">Overview</button>
+      <button role="tab" data-tab="rq" aria-selected="true" class="t">Requirements</button>
+      <button role="tab" data-tab="st" aria-selected="false" class="t">Style</button>
+      <button role="tab" data-tab="rj" aria-selected="false" class="t">Rejection patterns</button>
+      <button role="tab" data-tab="ex" aria-selected="false" class="t">Example papers</button>
+      <button role="tab" data-tab="so" aria-selected="false" class="t">Sources</button>
+      <button role="tab" data-tab="hi" aria-selected="false" class="t">Compliance history</button>
+    </div>
+    <div data-pane="ov" hidden style="padding-top:16px"><div class="grid2"><div class="stack">
+      <section class="box"><header><h2 class="t">Scope</h2></header><div class="in"><p style="padding:8px 0">Original clinical and methodological research on structural and functional brain imaging in neurological and psychiatric populations. Reviews are by invitation. Case reports are not considered.</p></div></section>
+      <section class="box"><header><h2 class="t">Official guidelines</h2></header><div class="in"><div class="kv"><span>Author guidelines</span><span class="faint">v2026.2</span></div><div class="kv"><span>Reporting checklist</span><span class="faint">v2025.4</span></div></div></section></div>
+      <section class="box"><header><h2 class="t">Profile summary</h2></header><div class="in">
+        <div class="kv"><span class="t">Requirements</span><span class="mono">24</span></div><div class="kv"><span class="t">Observed patterns</span><span class="mono">9</span></div><div class="kv"><span class="t">Example papers</span><span class="mono">20</span></div><div class="kv"><span class="t">Sources</span><span class="mono">6</span></div></div></section></div></div>
+    <div data-pane="rq" style="padding-top:16px">
+      <div class="legend">
+        <div><span class="badge b-official t">Official requirement</span><span class="t">Stated by the journal</span></div>
+        <div><span class="badge b-observed t">Observed pattern</span><span class="t">Seen in published papers</span></div>
+        <div><span class="badge b-model"><svg class="i"><use href="#i-spark"/></svg><span class="t">Model assessment</span></span><span class="t">Inferred by the AI, not journal policy</span></div>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th class="t">Requirement</th><th class="t">Type</th><th class="t">Basis</th><th class="t">Status</th><th class="t">Source</th><th class="t">Verified</th></tr></thead>
+        <tbody>
+          <tr><td>Structured abstract, 250 words maximum</td><td><span class="badge b-crit t">Mandatory</span></td><td><span class="badge b-official t">Official requirement</span></td><td><span class="badge b-ok t">Met</span></td><td class="faint">Author guidelines §2.1</td><td class="mono">12 Sep 2026</td></tr>
+          <tr><td>Methods report scanner, sequence and acquisition parameters</td><td><span class="badge b-crit t">Mandatory</span></td><td><span class="badge b-official t">Official requirement</span></td><td><span class="badge b-crit t">Not met</span></td><td class="faint">Author guidelines §3.2</td><td class="mono">12 Sep 2026</td></tr>
+          <tr><td>Data availability statement</td><td><span class="badge b-crit t">Mandatory</span></td><td><span class="badge b-official t">Official requirement</span></td><td><span class="badge b-crit t">Not met</span></td><td class="faint">Author guidelines §5</td><td class="mono">12 Sep 2026</td></tr>
+          <tr><td>Vancouver reference style</td><td><span class="badge b-crit t">Mandatory</span></td><td><span class="badge b-official t">Official requirement</span></td><td><span class="badge b-ok t">Met</span></td><td class="faint">Author guidelines §6.4</td><td class="mono">12 Sep 2026</td></tr>
+          <tr><td>Limitations paragraph in the Discussion</td><td><span class="badge b-info t">Recommended</span></td><td><span class="badge b-observed t">Observed pattern</span></td><td><span class="badge b-warn t">Needs review</span></td><td class="faint">14 of 20 sampled papers</td><td class="mono">02 Oct 2026</td></tr>
+          <tr><td>Effect sizes reported with confidence intervals</td><td><span class="badge b-mute t">Quality</span></td><td><span class="badge b-model"><svg class="i"><use href="#i-spark"/></svg><span class="t">Model assessment</span></span></td><td><span class="badge b-warn t">Needs review</span></td><td class="faint">qwen2.5:14b</td><td class="mono">02 Oct 2026</td></tr>
+          <tr><td>Avoid causal wording for cross-sectional associations</td><td><span class="badge b-warn t">Warning</span></td><td><span class="badge b-model"><svg class="i"><use href="#i-spark"/></svg><span class="t">Model assessment</span></span></td><td><span class="badge b-warn t">Needs review</span></td><td class="faint">qwen2.5:14b</td><td class="mono">02 Oct 2026</td></tr>
+        </tbody></table></div>
+    </div>
+    <div data-pane="st" hidden style="padding-top:16px"><section class="box"><header><h2 class="t">Style guide</h2></header><div class="in">
+      <div class="kv"><span>Reference style</span><span>Vancouver, numbered</span></div><div class="kv"><span>Spelling</span><span>British English</span></div><div class="kv"><span>Headings</span><span>Three levels, sentence case</span></div></div></section></div>
+    <div data-pane="rj" hidden style="padding-top:16px"><section class="box"><header><h2 class="t">Rejection patterns</h2><span class="badge b-observed t">Observed pattern</span></header><div class="in">
+      <div class="row"><div class="grow"><div class="tt">Underpowered samples without justification</div><div class="faint">Cited in 7 of 18 public decision letters</div></div></div>
+      <div class="row"><div class="grow"><div class="tt">Scanner heterogeneity not addressed</div><div class="faint">Cited in 5 of 18 public decision letters</div></div></div></div></section></div>
+    <div data-pane="ex" hidden style="padding-top:16px"><section class="box"><header><h2 class="t">Example papers</h2></header><div class="in">
+      <div class="row"><svg class="i faint"><use href="#i-paper"/></svg><div class="grow"><div class="tt">Longitudinal hippocampal volume change in mild cognitive impairment</div><div class="faint">2023</div></div></div>
+      <div class="row"><svg class="i faint"><use href="#i-paper"/></svg><div class="grow"><div class="tt">Segmentation reliability across 3T scanner vendors</div><div class="faint">2021</div></div></div></div></section></div>
+    <div data-pane="so" hidden style="padding-top:16px"><section class="box"><header><h2 class="t">Sources</h2></header><div class="in">
+      <div class="kv"><span>Author guidelines</span><span class="faint">Checked 12 Sep 2026</span></div><div class="kv"><span>Reporting checklist</span><span class="faint">Checked 12 Sep 2026</span></div><div class="kv"><span>20 published papers</span><span class="faint">Sampled 02 Oct 2026</span></div></div></section></div>
+    <div data-pane="hi" hidden style="padding-top:16px"><section class="box"><header><h2 class="t">Compliance history</h2></header><div class="in">
+      <div class="kv"><span>Hippocampal atrophy rates · check #4</span><span class="badge b-crit t">Not ready</span></div><div class="kv"><span>Hippocampal atrophy rates · check #3</span><span class="badge b-crit t">Not ready</span></div></div></section></div>
+  </div>
+</section>
+
+<!-- MANUSCRIPT -->
+<section class="screen panes" id="s-manuscript" aria-labelledby="h-manuscript" hidden>
+  <div class="dochead">
+    <div><h1 id="h-manuscript">Hippocampal atrophy rates and cognitive decline in mild cognitive impairment</h1>
+      <div class="meta"><span><span class="t">Target journal</span>: Journal of Applied Neuroimaging</span><span class="sep">|</span><span>3,412 <span class="t">words</span></span></div></div>
+    <div class="actions"><span class="badge b-mute"><span class="t">Status</span>:&nbsp;<span class="t">Draft</span></span><button class="btn"><svg class="i"><use href="#i-clock"/></svg><span class="t">Version history</span></button><button class="btn pri" data-go="compliance"><svg class="i"><use href="#i-shield"/></svg><span class="t">Run compliance check</span></button></div>
+  </div>
+  <div class="pbody">
+    <div class="pane l outline" role="navigation" aria-label="Outline">
+      <div class="h-label" style="padding:4px 10px 8px"><span class="t">Outline</span></div>
+      <button><span class="t">Abstract</span></button>
+      <button><span class="t">Introduction</span><i class="pip w" title="1 warning"></i></button>
+      <button><span class="t">Methods</span><i class="pip" title="Blocking issue"></i></button>
+      <button><span class="t">Results</span></button>
+      <button aria-current="true"><span class="t">Discussion</span><i class="pip w" title="2 issues"></i></button>
+      <button><span class="t">Conclusion</span></button>
+      <button><span class="t">References</span></button>
+    </div>
+    <div class="pane c" style="position:relative">
+      <div class="edtool" role="toolbar" aria-label="Formatting">
+        <select aria-label="Block style"><option>Paragraph</option><option>Heading 2</option><option>Heading 3</option></select>
+        <span class="sepv"></span>
+        <button class="iconbtn" aria-label="Bold" style="font-weight:700">B</button><button class="iconbtn" aria-label="Italic" style="font-style:italic;font-family:var(--read)">I</button>
+        <button class="iconbtn" aria-label="List"><svg class="i"><use href="#i-list"/></svg></button><button class="iconbtn" aria-label="Table"><svg class="i"><use href="#i-table"/></svg></button>
+        <button class="iconbtn" aria-label="Insert citation"><svg class="i"><use href="#i-cite"/></svg></button><button class="iconbtn" aria-label="Comment"><svg class="i"><use href="#i-comment"/></svg></button>
+        <span class="sepv"></span>
+        <button class="iconbtn" aria-label="Undo"><svg class="i"><use href="#i-undo"/></svg></button><button class="iconbtn" aria-label="Redo"><svg class="i flip" style="transform:scaleX(-1)"><use href="#i-undo"/></svg></button>
+        <span class="saved"><i class="dot"></i><span class="t">Saved</span> 14:32</span>
+      </div>
+      <article class="page" style="margin-top:18px">
+        <h3 class="t">Discussion</h3>
+        <p>In this cohort, participants with mild cognitive impairment lost hippocampal volume faster than age-matched controls, in line with earlier longitudinal reports <span class="cite">[3,7]</span>. The difference was largest in the first twelve months of follow-up.</p>
+        <p id="ms-claim"><span class="unsup" id="claimTxt">Annualised hippocampal atrophy of 3.1% therefore explains the faster decline observed in APOE ε4 carriers, and this effect is clearly the main driver of conversion to dementia.</span></p>
+        <p>Several limitations should be considered. Follow-up was restricted to 24 months, and scanner differences between sites may have added variance to the volumetric estimates.</p>
+      </article>
+    </div>
+    <aside class="pane r tabgroup" aria-label="AI assistant">
+      <div class="tabs" role="tablist" style="padding-inline:6px">
+        <button role="tab" data-tab="sg" aria-selected="true" class="t">Suggestions</button>
+        <button role="tab" data-tab="ev" aria-selected="false" class="t">Evidence</button>
+        <button role="tab" data-tab="is" aria-selected="false"><span class="t">Issues</span> 3</button>
+        <button role="tab" data-tab="co" aria-selected="false" class="t">Compliance</button>
+      </div>
+      <div data-pane="sg" class="paneBody">
+        <div style="padding:12px 14px 0"><div class="h-label"><span class="t">Selected: Discussion, paragraph 2</span></div>
+          <div class="chips" style="margin-top:8px">
+            <button class="chip t">Improve clarity</button><button class="chip t">Grammar</button><button class="chip t">More concise</button><button class="chip t">Expand</button><button class="chip t">Check consistency</button><button class="chip t">Find unsupported claim</button><button class="chip t">Suggest citation</button><button class="chip t">Compare with journal style</button></div></div>
+        <div class="sugg" id="sugg1">
+          <div class="blk"><span class="lab t">Original</span><del>Annualised hippocampal atrophy of 3.1% therefore explains the faster decline observed in APOE ε4 carriers, and this effect is clearly the main driver of conversion to dementia.</del></div>
+          <div class="blk"><span class="lab t">Suggestion</span><ins>Annualised hippocampal atrophy of 3.1% was associated with faster decline in APOE ε4 carriers. This association may contribute to conversion to dementia, although the present design cannot establish causation.</ins></div>
+          <div class="blk"><span class="lab t">Why</span><span class="muted t">The original claims causation and has no supporting source in your knowledge base.</span></div>
+          <div class="foot" id="suggFoot"><button class="btn sm ok" id="accept"><svg class="i"><use href="#i-check"/></svg><span class="t">Accept</span></button><button class="btn sm bad" id="reject"><svg class="i"><use href="#i-x"/></svg><span class="t">Reject</span></button><span class="faint t" style="margin-inline-start:auto;font-size:12px">Nothing changes until you accept</span></div>
+        </div>
+      </div>
+      <div data-pane="ev" hidden class="paneBody" style="padding:12px 14px">
+        <div class="evi"><span class="badge b-mute t">General knowledge</span><div class="note t">“Hippocampal atrophy is associated with cognitive decline” is widely reported, but no paper in your knowledge base states it for this cohort.</div></div>
+        <div class="evi"><span class="badge b-ok"><svg class="i"><use href="#i-check"/></svg><span class="t">Direct evidence</span></span><dl><dt class="t">Paper</dt><dd>Haddad et al. 2023</dd><dt class="t">Page</dt><dd class="mono">9</dd><dt class="t">Section</dt><dd class="t">Results</dd></dl></div>
+      </div>
+      <div data-pane="is" hidden class="paneBody" style="padding:6px 14px">
+        <div class="row"><span class="sev critical"></span><div class="grow"><div class="tt t">Unsupported claim: “main driver of conversion”</div><div class="faint">Discussion ¶2</div></div></div>
+        <div class="row"><span class="sev warning"></span><div class="grow"><div class="tt t">Causal wording for an observational design</div><div class="faint">Discussion ¶2</div></div></div>
+        <div class="row"><span class="sev blocking"></span><div class="grow"><div class="tt t">Structured Methods section is missing</div><div class="faint">Methods</div></div></div>
+      </div>
+      <div data-pane="co" hidden class="paneBody" style="padding:12px 14px">
+        <div class="h-label"><span class="t">Submission readiness</span></div>
+        <div class="verdict no" style="margin:8px 0 10px"><svg class="i"><use href="#i-x"/></svg><span class="t">NOT READY</span></div>
+        <p class="muted t">2 blocking issues remain.</p>
+        <button class="btn" data-go="compliance" style="margin-top:10px"><span class="t">Open compliance</span></button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section class="screen" id="s-compliance" aria-labelledby="h-compliance" hidden>
+  <div class="pagehead">
+    <div><h1 id="h-compliance" class="t">Journal Compliance</h1><p class="sub">Hippocampal atrophy rates · Journal of Applied Neuroimaging</p></div>
+    <div class="actions"><button class="btn"><span class="t">Export report</span></button><button class="btn pri"><svg class="i"><use href="#i-refresh"/></svg><span class="t">Run compliance check</span></button></div>
+  </div>
+  <div class="gate">
+    <div>
+      <div class="h-label"><span class="t">Submission readiness</span></div>
+      <div class="verdict no"><svg class="i"><use href="#i-x"/></svg><span class="t">NOT READY</span></div>
+      <p class="muted t" style="margin-top:10px;max-width:340px">This status covers known journal requirements and automated checks only. It does not predict acceptance.</p>
+    </div>
+    <div>
+      <ul class="chk">
+        <li><svg class="i ok"><use href="#i-check"/></svg><span class="t">Journal requirements checked</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span class="t">Manuscript structure checked</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span class="t">References checked</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span class="t">Figures checked</span></li>
+        <li><svg class="i no"><use href="#i-x"/></svg><b class="t">2 blocking issues remain</b></li>
+      </ul>
+    </div>
+  </div>
+  <section class="box" style="margin-bottom:6px"><header><h2 class="t">Checks passed by area</h2></header><div class="in">
+    <div class="meter"><span class="t">Mandatory requirements</span><div class="prog crit"><i style="width:80%"></i></div><span class="v">16/20</span></div>
+    <div class="meter"><span class="t">Scientific completeness</span><div class="prog warn"><i style="width:70%"></i></div><span class="v">7/10</span></div>
+    <div class="meter"><span class="t">Writing</span><div class="prog ok"><i style="width:85%"></i></div><span class="v">17/20</span></div>
+    <div class="meter"><span class="t">References</span><div class="prog warn"><i style="width:75%"></i></div><span class="v">30/40</span></div>
+    <div class="meter"><span class="t">Submission package</span><div class="prog warn"><i style="width:70%"></i></div><span class="v">7/10</span></div>
+  </div></section>
+
+  <div class="group-h"><span class="badge b-crit t">Blocking</span><span class="faint">2</span></div>
+  <details class="issue" open><summary><span class="sev blocking" style="height:20px"></span><b class="t">Missing mandatory section: structured Methods</b><span class="badge b-official t">Official requirement</span><svg class="i ch flip"><use href="#i-chev"/></svg></summary>
+    <dl class="dd"><dt class="t">Why it matters</dt><dd class="t">The journal rejects submissions that do not report scanner, sequence and acquisition parameters.</dd><dt class="t">Evidence</dt><dd>Author guidelines §3.2, verified 12 Sep 2026</dd><dt class="t">Location</dt><dd class="t">Methods</dd><dt class="t">Suggested action</dt><dd class="t">Add an “MRI acquisition” subsection with the parameters from the paper’s Methods.</dd></dl></details>
+  <details class="issue"><summary><span class="sev blocking" style="height:20px"></span><b class="t">Data availability statement is absent</b><span class="badge b-official t">Official requirement</span><svg class="i ch flip"><use href="#i-chev"/></svg></summary>
+    <dl class="dd"><dt class="t">Why it matters</dt><dd class="t">A statement is required before the editorial office will process the submission.</dd><dt class="t">Evidence</dt><dd>Author guidelines §5</dd><dt class="t">Location</dt><dd class="t">After Conclusion</dd><dt class="t">Suggested action</dt><dd class="t">State where the data can be accessed, or why it cannot be shared.</dd></dl></details>
+
+  <div class="group-h"><span class="badge b-warn t">Critical</span><span class="faint">1</span></div>
+  <details class="issue"><summary><span class="sev critical" style="height:20px"></span><b class="t">Unsupported claim: “main driver of conversion”</b><span class="badge b-mute t">Needs review</span><svg class="i ch flip"><use href="#i-chev"/></svg></summary>
+    <dl class="dd"><dt class="t">Why it matters</dt><dd class="t">Reviewers will ask for a source or a design that supports a causal statement.</dd><dt class="t">Evidence</dt><dd class="t">No direct evidence found in the knowledge base.</dd><dt class="t">Location</dt><dd class="t">Discussion, paragraph 2</dd><dt class="t">Suggested action</dt><dd><button class="btn sm" data-go="manuscript"><span class="t">Review suggestion</span></button></dd></dl></details>
+
+  <div class="group-h"><span class="badge b-mute t">Warning</span><span class="faint">1</span></div>
+  <details class="issue"><summary><span class="sev warning" style="height:20px"></span><b class="t">Effect sizes lack confidence intervals</b><span class="badge b-model"><svg class="i"><use href="#i-spark"/></svg><span class="t">Model assessment</span></span><svg class="i ch flip"><use href="#i-chev"/></svg></summary>
+    <dl class="dd"><dt class="t">Why it matters</dt><dd class="t">This is the model’s judgement, not stated journal policy.</dd><dt class="t">Evidence</dt><dd>Results, Table 2</dd><dt class="t">Location</dt><dd class="t">Results</dd><dt class="t">Suggested action</dt><dd class="t">Report 95% confidence intervals beside each effect size.</dd></dl></details>
+
+  <div class="group-h"><span class="badge b-info t">Suggestion</span><span class="faint">1</span></div>
+  <details class="issue"><summary><span class="sev suggestion" style="height:20px"></span><b class="t">Add a limitations paragraph heading</b><span class="badge b-observed t">Observed pattern</span><svg class="i ch flip"><use href="#i-chev"/></svg></summary>
+    <dl class="dd"><dt class="t">Why it matters</dt><dd class="t">14 of 20 sampled papers use a labelled limitations paragraph.</dd><dt class="t">Evidence</dt><dd class="t">Sampled papers, 02 Oct 2026</dd><dt class="t">Location</dt><dd class="t">Discussion, paragraph 3</dd><dt class="t">Suggested action</dt><dd class="t">Optional. Start the paragraph with a short heading.</dd></dl></details>
+</section>
+
+<!-- REPORTS -->
+<section class="screen" id="s-reports" aria-labelledby="h-reports" hidden>
+  <div class="pagehead"><div><h1 id="h-reports" class="t">Reports</h1><p class="sub t">Generated analyses you can view, export and save</p></div></div>
+  <div class="tbl"><table>
+    <thead><tr><th class="t">Report</th><th class="t">Subject</th><th class="t">Generated</th><th></th></tr></thead>
+    <tbody>
+      <tr><td class="t">Manuscript analysis</td><td>Hippocampal atrophy rates</td><td class="mono">03 Oct 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Journal compliance</td><td>Journal of Applied Neuroimaging</td><td class="mono">03 Oct 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Scientific completeness</td><td>Hippocampal atrophy rates</td><td class="mono">01 Oct 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Citation analysis</td><td>Hippocampal atrophy rates</td><td class="mono">01 Oct 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Evidence report</td><td>Discussion section</td><td class="mono">30 Sep 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Rejection pattern analysis</td><td>Journal of Applied Neuroimaging</td><td class="mono">28 Sep 2026</td><td><span class="actions"><button class="btn sm t">View</button><button class="btn sm t">Export</button><button class="btn sm t">Save</button></span></td></tr>
+      <tr><td class="t">Final submission report</td><td><span class="faint t">Available after all blocking issues are resolved</span></td><td class="mono faint">—</td><td><button class="btn sm t" disabled>View</button></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- MODELS & SYSTEM -->
+<section class="screen" id="s-models" aria-labelledby="h-models" hidden>
+  <div class="pagehead">
+    <div><h1 id="h-models" class="t">Models &amp; System</h1><p class="sub t">Choose which local model handles each task</p></div>
+    <div class="actions"><button class="btn" id="simOutage"><svg class="i"><use href="#i-alert"/></svg><span class="t" id="simTx">Simulate Ollama outage</span></button></div>
+  </div>
+  <div class="alert" id="outage" role="alert" hidden>
+    <svg class="i" style="color:var(--crit);margin-top:2px"><use href="#i-alert"/></svg>
+    <div><h3 class="t">Ollama unavailable</h3><p class="t">The application cannot currently communicate with the local AI service. Check that Ollama is running.</p>
+      <div class="actions" style="margin-top:8px"><button class="btn sm"><svg class="i"><use href="#i-refresh"/></svg><span class="t">Retry</span></button><details><summary class="faint" style="cursor:pointer"><span class="t">Technical details</span></summary><div class="mono faint" style="margin-top:6px">connect ECONNREFUSED 127.0.0.1:11434</div></details></div></div>
+  </div>
+  <div class="grid2">
+    <div class="tbl"><table>
+      <thead><tr><th class="t">Role</th><th class="t">Model</th><th class="t">Status</th><th class="t">Context</th><th class="t">Memory</th><th class="t">Speed</th></tr></thead>
+      <tbody>
+        <tr><td class="t">General chat</td><td><select class="field mono" aria-label="General chat model"><option>qwen2.5:14b</option><option>qwen2.5:7b</option><option>llama3.1:8b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">32k</td><td class="mono">9.4 GB</td><td class="mono">14 tok/s</td></tr>
+        <tr><td class="t">Literature analysis</td><td><select class="field mono" aria-label="Literature analysis model"><option>qwen2.5:14b</option><option>qwen2.5:7b</option><option>llama3.1:8b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">32k</td><td class="mono">9.4 GB</td><td class="mono">14 tok/s</td></tr>
+        <tr><td class="t">Academic writing</td><td><select class="field mono" aria-label="Academic writing model"><option>qwen2.5:14b</option><option>qwen2.5:7b</option><option>llama3.1:8b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">32k</td><td class="mono">9.4 GB</td><td class="mono">14 tok/s</td></tr>
+        <tr><td class="t">Summarization</td><td><select class="field mono" aria-label="Summarization model"><option>qwen2.5:7b</option><option>qwen2.5:14b</option><option>llama3.1:8b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">32k</td><td class="mono">5.1 GB</td><td class="mono">28 tok/s</td></tr>
+        <tr><td class="t">Embeddings</td><td><select class="field mono" aria-label="Embedding model"><option>nomic-embed-text</option><option>bge-m3</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">8k</td><td class="mono">0.6 GB</td><td class="mono">fast</td></tr>
+        <tr><td class="t">Classification</td><td><select class="field mono" aria-label="Classification model"><option>qwen2.5:7b</option><option>llama3.1:8b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">8k</td><td class="mono">5.1 GB</td><td class="mono">28 tok/s</td></tr>
+        <tr><td class="t">Journal evaluation</td><td><select class="field mono" aria-label="Journal evaluation model"><option>qwen2.5:14b</option><option>qwen2.5:7b</option></select></td><td><span class="badge b-ok st-model t">Ready</span></td><td class="mono">32k</td><td class="mono">9.4 GB</td><td class="mono">14 tok/s</td></tr>
+      </tbody></table></div>
+    <section class="box"><header><h2 class="t">System status</h2></header><div class="in">
+      <div class="kv"><span class="t">Backend</span><span class="s"><i class="dot"></i><span class="t">Online</span></span></div>
+      <div class="kv"><span class="t">Database</span><span class="s"><i class="dot"></i><span class="t">Connected</span></span></div>
+      <div class="kv"><span>Ollama</span><span class="s"><i class="dot dyn-ollama"></i><span class="t dyn-ollama-tx">Connected</span></span></div>
+      <div class="kv"><span class="t">Embedding</span><span class="s"><i class="dot"></i><span class="t">Ready</span></span></div>
+      <div class="kv"><span class="t">Vector DB</span><span class="s"><i class="dot"></i><span class="t">Ready</span></span></div>
+      <div class="kv"><span>OCR</span><span class="s"><i class="dot"></i><span class="t">Ready</span></span></div>
+      <div class="kv"><span class="t">Storage</span><span class="s"><i class="dot"></i><span class="t">Ready</span></span></div>
+    </div></section>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<div class="scrim" id="pal" hidden>
+  <div class="pal" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="palIn" type="text" placeholder="Type a command or search" data-p="Type a command or search" autocomplete="off">
+    <ul id="palList"></ul>
+    <div class="hint"><span><kbd>↑</kbd> <kbd>↓</kbd></span><span><kbd>Enter</kbd></span><span><kbd>Esc</kbd></span></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+var AR={
+"Academic Research Assistant":"مساعد البحث الأكاديمي","Project":"المشروع","Search papers, journals, manuscripts…":"ابحث في الأوراق والمجلات والمخطوطات…","All systems ready":"كل الأنظمة جاهزة","Ollama unavailable":"Ollama غير متاح","Mockup · sample data":"نموذج أولي · بيانات تجريبية",
+"Workspace":"مساحة العمل","Dashboard":"لوحة التحكم","Papers":"الأوراق العلمية","Journals":"المجلات","Manuscripts":"المخطوطات","Review":"المراجعة","Compliance":"الامتثال","Reports":"التقارير","Models & System":"النماذج والنظام",
+"Research Overview":"نظرة عامة على البحث","What is happening in your project right now":"ما الذي يحدث في مشروعك الآن","Upload paper":"رفع ورقة","Continue writing":"متابعة الكتابة",
+"Active projects":"مشاريع نشطة","Journal profiles":"ملفات المجلات","Done":"تم","In progress":"قيد التنفيذ","Next":"التالي","Import papers":"استيراد الأوراق","Build knowledge base":"بناء قاعدة المعرفة","Ask the literature":"اسأل الأدبيات","Write manuscript":"كتابة المخطوطة","Check journal fit":"فحص ملاءمة المجلة","Final submission review":"المراجعة النهائية للتقديم",
+"Attention required":"يتطلب انتباهك","Open compliance":"فتح الامتثال","Structured Methods section is missing":"قسم المنهجية المنظم مفقود","Blocking":"مانع","2 unsupported claims in the Discussion":"ادعاءان بلا دعم في المناقشة","No direct evidence in the knowledge base":"لا يوجد دليل مباشر في قاعدة المعرفة","Critical":"حرج","Warning":"تحذير","Suggestion":"اقتراح","1 missing citation in the Introduction":"استشهاد مفقود في المقدمة","Journal profile needs verification":"ملف المجلة يحتاج إلى تحقق",
+"Recent papers":"أحدث الأوراق","All papers":"كل الأوراق","Ready":"جاهز","Processing":"قيد المعالجة","Recent activity":"النشاط الأخير","Paper imported":"تم استيراد ورقة","PDF processed":"تمت معالجة PDF","Manuscript analyzed":"تم تحليل المخطوطة","Journal requirements updated":"تم تحديث متطلبات المجلة",
+"Processing queue":"قائمة المعالجة","Extracting sections":"استخراج الأقسام","Generating embeddings":"توليد التضمينات","Completed":"مكتمل","System status":"حالة النظام","Details":"التفاصيل","Backend":"الخادم","Online":"متصل","Database":"قاعدة البيانات","Connected":"متصل","Vector DB":"قاعدة المتجهات","AI model status":"حالة نماذج الذكاء الاصطناعي","Academic writing":"الكتابة الأكاديمية","Embeddings":"التضمينات","Journal evaluation":"تقييم المجلة",
+"Your research library":"مكتبتك البحثية","Import from URL":"استيراد من رابط","Upload PDF":"رفع PDF","Drop PDF files here":"أسقط ملفات PDF هنا","or use Upload PDF. Text, sections and embeddings are prepared automatically.":"أو استخدم رفع PDF. تُجهَّز النصوص والأقسام والتضمينات تلقائيًا.","Search title, author, DOI":"ابحث بالعنوان أو المؤلف أو DOI","All":"الكل","Needs attention":"يحتاج إلى معالجة",
+"Title":"العنوان","Year":"السنة","Journal":"المجلة","DOI":"DOI","Tags":"الوسوم","Status":"الحالة","Analyze":"تحليل","Failed":"فشل","Retry":"إعادة المحاولة",
+"Find in paper":"بحث داخل الورقة","Summarize":"تلخيص","Sections":"الأقسام","Abstract":"الملخص","Introduction":"المقدمة","Methods":"المنهجية","Results":"النتائج","Discussion":"المناقشة","References":"المراجع","Conclusion":"الخاتمة",
+"Ask AI":"اسأل الذكاء الاصطناعي","Add to notes":"أضف إلى الملاحظات","Ask about":"اسأل عن","Current paper":"الورقة الحالية","Selected papers":"الأوراق المحددة","Current journal":"المجلة الحالية","Current manuscript":"المخطوطة الحالية","Entire knowledge base":"قاعدة المعرفة كاملة","General AI":"ذكاء اصطناعي عام",
+"Direct evidence":"دليل مباشر","Inference":"استنتاج","General knowledge":"معرفة عامة","Paper":"الورقة","Page":"الصفحة","Section":"القسم","Copy":"نسخ","Regenerate":"إعادة التوليد","Extract results":"استخراج النتائج","Extract methodology":"استخراج المنهجية","Extract limitations":"استخراج القيود","Ask about this paper":"اسأل عن هذه الورقة","Focus AI assistant":"التركيز على المساعد",
+"The pipeline resembles common surface-based tools, but the paper never states which one. Treat this as a guess, not a finding.":"يشبه مسار المعالجة أدوات شائعة، لكن الورقة لا تذكر أيها. اعتبر هذا تخمينًا لا نتيجة.",
+"Re-verify sources":"إعادة التحقق من المصادر","Last verified":"آخر تحقق","Overview":"نظرة عامة","Requirements":"المتطلبات","Style":"الأسلوب","Rejection patterns":"أنماط الرفض","Example papers":"أوراق نموذجية","Sources":"المصادر","Compliance history":"سجل الامتثال",
+"Scope":"النطاق","Official guidelines":"الإرشادات الرسمية","Profile summary":"ملخص الملف","Observed patterns":"الأنماط المرصودة","Official requirement":"متطلب رسمي","Observed pattern":"نمط مرصود","Model assessment":"تقييم النموذج","Stated by the journal":"تنص عليه المجلة","Seen in published papers":"مرصود في الأوراق المنشورة","Inferred by the AI, not journal policy":"استنتاج الذكاء الاصطناعي وليس سياسة المجلة",
+"Requirement":"المتطلب","Type":"النوع","Basis":"الأساس","Source":"المصدر","Verified":"التحقق","Mandatory":"إلزامي","Recommended":"موصى به","Quality":"جودة","Met":"مستوفى","Not met":"غير مستوفى","Needs review":"يحتاج إلى مراجعة","Style guide":"دليل الأسلوب",
+"Target journal":"المجلة المستهدفة","words":"كلمة","Status":"الحالة","Draft":"مسودة","Version history":"سجل الإصدارات","Run compliance check":"تشغيل فحص الامتثال","Outline":"المخطط","Saved":"تم الحفظ",
+"Suggestions":"الاقتراحات","Evidence":"الأدلة","Issues":"المشكلات","Selected: Discussion, paragraph 2":"المحدد: المناقشة، الفقرة 2","Improve clarity":"تحسين الوضوح","Grammar":"القواعد","More concise":"أكثر إيجازًا","Expand":"توسيع","Check consistency":"فحص الاتساق","Find unsupported claim":"البحث عن ادعاء بلا دعم","Suggest citation":"اقتراح استشهاد","Compare with journal style":"مقارنة بأسلوب المجلة",
+"Original":"الأصل","Suggestion":"الاقتراح","Why":"السبب","Accept":"قبول","Reject":"رفض","Nothing changes until you accept":"لا يتغير شيء حتى تقبل","Applied. The Discussion text has been updated.":"تم التطبيق. تم تحديث نص المناقشة.","Rejected. The original text is unchanged.":"تم الرفض. النص الأصلي كما هو.","Undo":"تراجع",
+"The original claims causation and has no supporting source in your knowledge base.":"يدّعي النص الأصلي علاقة سببية ولا يوجد له مصدر داعم في قاعدة المعرفة.",
+"Submission readiness":"جاهزية التقديم","NOT READY":"غير جاهز","2 blocking issues remain.":"تبقى مشكلتان مانعتان.",
+"Journal Compliance":"امتثال المجلة","Export report":"تصدير التقرير","This status covers known journal requirements and automated checks only. It does not predict acceptance.":"تشمل هذه الحالة متطلبات المجلة المعروفة والفحوص الآلية فقط، ولا تتنبأ بالقبول.",
+"Journal requirements checked":"تم فحص متطلبات المجلة","Manuscript structure checked":"تم فحص بنية المخطوطة","References checked":"تم فحص المراجع","Figures checked":"تم فحص الأشكال","2 blocking issues remain":"تبقى مشكلتان مانعتان",
+"Checks passed by area":"الفحوص الناجحة حسب المجال","Mandatory requirements":"المتطلبات الإلزامية","Scientific completeness":"الاكتمال العلمي","Writing":"الكتابة","Submission package":"حزمة التقديم",
+"Missing mandatory section: structured Methods":"قسم إلزامي مفقود: منهجية منظمة","Data availability statement is absent":"بيان إتاحة البيانات غائب","Unsupported claim: “main driver of conversion”":"ادعاء بلا دعم: «المحرك الرئيسي للتحول»","Effect sizes lack confidence intervals":"أحجام التأثير بلا فترات ثقة","Add a limitations paragraph heading":"أضف عنوانًا لفقرة القيود",
+"Why it matters":"لماذا يهم","Location":"الموضع","Suggested action":"الإجراء المقترح","Methods":"المنهجية",
+"The journal rejects submissions that do not report scanner, sequence and acquisition parameters.":"ترفض المجلة الأوراق التي لا تذكر الجهاز والتسلسل ومعاملات الاكتساب.","Add an “MRI acquisition” subsection with the parameters from the paper’s Methods.":"أضف قسمًا فرعيًا «اكتساب الرنين المغناطيسي» بالمعاملات المذكورة في المنهجية.",
+"Review suggestion":"مراجعة الاقتراح","Reports":"التقارير","Generated analyses you can view, export and save":"تحليلات مولّدة يمكنك عرضها وتصديرها وحفظها","Report":"التقرير","Generated":"تاريخ الإنشاء","View":"عرض","Export":"تصدير","Save":"حفظ",
+"Manuscript analysis":"تحليل المخطوطة","Journal compliance":"امتثال المجلة","Scientific completeness":"الاكتمال العلمي","Citation analysis":"تحليل الاستشهادات","Evidence report":"تقرير الأدلة","Rejection pattern analysis":"تحليل أنماط الرفض","Final submission report":"تقرير التقديم النهائي","Available after all blocking issues are resolved":"متاح بعد حل جميع المشكلات المانعة",
+"Choose which local model handles each task":"اختر النموذج المحلي المسؤول عن كل مهمة","Simulate Ollama outage":"محاكاة انقطاع Ollama","Restore Ollama":"استعادة Ollama","Disconnected":"غير متصل",
+"The application cannot currently communicate with the local AI service. Check that Ollama is running.":"لا يستطيع التطبيق حاليًا الاتصال بخدمة الذكاء الاصطناعي المحلية. تأكد من أن Ollama يعمل.","Technical details":"التفاصيل التقنية",
+"Role":"الدور","Model":"النموذج","Context":"السياق","Memory":"الذاكرة","Speed":"السرعة","General chat":"محادثة عامة","Literature analysis":"تحليل الأدبيات","Summarization":"التلخيص","Classification":"التصنيف","Embedding":"التضمين","Storage":"التخزين",
+"Type a command or search":"اكتب أمرًا أو ابحث","Search papers":"البحث في الأوراق","Open manuscript":"فتح المخطوطة","Analyze manuscript":"تحليل المخطوطة","Open journal":"فتح مجلة","Switch AI model":"تبديل نموذج الذكاء الاصطناعي","Open settings":"فتح الإعدادات"
+};
+(function(){
+var root=document.documentElement, S=function(s,c){return (c||document).querySelector(s)}, A=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+var lang='en', theme='system', outage=false;
+function store(k,v){try{localStorage.setItem(k,v)}catch(e){}} function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+
+/* i18n */
+function tr(s){return lang==='ar'?(AR[s]||s):s}
+function applyLang(){
+  root.lang=lang; root.dir=lang==='ar'?'rtl':'ltr';
+  A('.t').forEach(function(el){ if(el._en===undefined) el._en=el.textContent.trim(); el.textContent=tr(el._en); });
+  A('[data-p]').forEach(function(el){ el.placeholder=tr(el.getAttribute('data-p')); });
+  renderPal(S('#palIn').value);
+  syncStatus();
+}
+
+/* theme */
+function applyTheme(){
+  if(theme==='system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme',theme);
+  S('#themeBtn use').setAttribute('href', (theme==='dark')?'#i-moon':'#i-sun');
+  S('#themeBtn').title='Theme: '+theme;
+}
+
+/* navigation */
+var cur='dashboard';
+function go(name){
+  cur=name;
+  A('.screen').forEach(function(s){ s.hidden = s.id!=='s-'+name; });
+  var navKey = name==='viewer'?'papers':name;
+  A('.nav').forEach(function(n){ if(n.dataset.go===navKey) n.setAttribute('aria-current','page'); else n.removeAttribute('aria-current'); });
+  S('#main').scrollTop=0;
+}
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-go]'); if(g && !(e.target.closest('button') && e.target.closest('button')!==g && g.tagName==='TR')){ go(g.dataset.go); closePal(); }
+});
+
+/* sidebar */
+S('#sbToggle').addEventListener('click',function(){ var c=S('#shell').classList.toggle('collapsed'); store('ara-sb',c?'1':'0'); });
+if(load('ara-sb')==='1') S('#shell').classList.add('collapsed');
+
+/* lang + theme buttons */
+S('#langBtn').addEventListener('click',function(){ lang=lang==='en'?'ar':'en'; store('ara-lang',lang); applyLang(); });
+S('#themeBtn').addEventListener('click',function(){ theme=theme==='system'?'light':theme==='light'?'dark':'system'; store('ara-theme',theme); applyTheme(); toast(tr('Theme')+': '+theme); });
+
+/* tabs */
+A('.tabgroup').forEach(function(g){
+  var tabs=A(':scope > .tabs [data-tab]',g), panes=A(':scope > [data-pane]',g);
+  tabs.forEach(function(t){ t.addEventListener('click',function(){
+    tabs.forEach(function(x){ x.setAttribute('aria-selected',x===t?'true':'false'); });
+    panes.forEach(function(p){ p.hidden = p.dataset.pane!==t.dataset.tab; });
+  });});
+});
+
+/* papers: filter, search, sort */
+var rows=A('#paperTbl tbody tr'), fState='all';
+function filterPapers(){
+  var q=S('#paperSearch').value.toLowerCase();
+  rows.forEach(function(r){ var ok=(fState==='all'||r.dataset.status===fState)&&(!q||r.textContent.toLowerCase().indexOf(q)>-1); r.hidden=!ok; });
+}
+S('#paperSearch').addEventListener('input',filterPapers);
+A('.chip[data-f]').forEach(function(c){ c.addEventListener('click',function(){ fState=c.dataset.f; A('.chip[data-f]').forEach(function(x){x.setAttribute('aria-pressed',x===c?'true':'false')}); filterPapers(); }); });
+A('#paperTbl th[data-sort]').forEach(function(th){ th.addEventListener('click',function(){
+  var i=+th.dataset.sort, asc=th.getAttribute('aria-sort')!=='ascending';
+  A('#paperTbl th').forEach(function(x){x.removeAttribute('aria-sort')}); th.setAttribute('aria-sort',asc?'ascending':'descending');
+  var body=S('#paperTbl tbody');
+  rows.slice().sort(function(a,b){ var x=a.children[i].textContent.trim().toLowerCase(), y=b.children[i].textContent.trim().toLowerCase(); return (x<y?-1:x>y?1:0)*(asc?1:-1); }).forEach(function(r){ body.appendChild(r); });
+});});
+A('#paperTbl button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); toast(b.textContent.trim()); }); });
+
+/* manuscript suggestion */
+var origClaim=S('#claimTxt').textContent;
+var newClaim='Annualised hippocampal atrophy of 3.1% was associated with faster decline in APOE ε4 carriers. This association may contribute to conversion to dementia, although the present design cannot establish causation.';
+function suggDone(msg){
+  var f=S('#suggFoot'); f.innerHTML='';
+  var s=document.createElement('span'); s.className='muted'; s.textContent=tr(msg); f.appendChild(s);
+  var u=document.createElement('button'); u.className='btn sm'; u.style.marginInlineStart='auto'; u.textContent=tr('Undo');
+  u.addEventListener('click',function(){ S('#claimTxt').textContent=origClaim; S('#claimTxt').className='unsup'; S('#sugg1').classList.remove('done'); f.innerHTML=suggHTML; bindSugg(); applyLang(); });
+  f.appendChild(u); S('#sugg1').classList.add('done');
+}
+var suggHTML=S('#suggFoot').innerHTML;
+function bindSugg(){
+  S('#accept').addEventListener('click',function(){ S('#claimTxt').textContent=newClaim; S('#claimTxt').className=''; suggDone('Applied. The Discussion text has been updated.'); });
+  S('#reject').addEventListener('click',function(){ suggDone('Rejected. The original text is unchanged.'); });
+}
+bindSugg();
+
+/* outage simulation */
+function syncStatus(){
+  A('.dyn-ollama').forEach(function(d){ d.className='dot dyn-ollama'+(outage?' crit':''); });
+  A('.dyn-ollama-tx').forEach(function(t){ t._en=outage?'Disconnected':'Connected'; t.textContent=tr(t._en); });
+  A('.st-model').forEach(function(b){ b.className='badge st-model t '+(outage?'b-crit':'b-ok'); b._en=outage?'Unavailable':'Ready'; b.textContent=tr(b._en); });
+  S('#statusDot').className='dot'+(outage?' crit':'');
+  var tx=S('#statusTx'); tx._en=outage?'Ollama unavailable':'All systems ready'; tx.textContent=tr(tx._en);
+  S('#modelTx').textContent=outage?'offline':'qwen2.5:14b';
+  S('#outage').hidden=!outage;
+  var st=S('#simTx'); st._en=outage?'Restore Ollama':'Simulate Ollama outage'; st.textContent=tr(st._en);
+}
+AR['Unavailable']='غير متاح'; AR['Theme']='المظهر';
+S('#simOutage').addEventListener('click',function(){ outage=!outage; syncStatus(); });
+
+/* command palette */
+var cmds=[['Search papers','papers','i-search'],['Open manuscript','manuscript','i-edit'],['Analyze manuscript','manuscript','i-spark'],['Upload paper','papers','i-upload'],['Open journal','journals','i-journal'],['Run compliance check','compliance','i-shield'],['Switch AI model','models','i-cpu'],['Open settings','models','i-cpu']];
+var palIdx=0, palShown=[];
+function renderPal(q){
+  q=(q||'').toLowerCase(); var ul=S('#palList'); ul.innerHTML=''; palShown=[];
+  cmds.forEach(function(c){ var label=tr(c[0]); if(!q||label.toLowerCase().indexOf(q)>-1||c[0].toLowerCase().indexOf(q)>-1) palShown.push(c); });
+  palIdx=0;
+  palShown.forEach(function(c,i){
+    var li=document.createElement('li'), b=document.createElement('button'); if(i===0) b.className='act';
+    b.innerHTML='<svg class="i"><use href="#'+c[2]+'"/></svg><span></span>'; b.lastChild.textContent=tr(c[0]);
+    b.addEventListener('click',function(){ go(c[1]); closePal(); });
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+function openPal(){ S('#pal').hidden=false; S('#palIn').value=''; renderPal(''); S('#palIn').focus(); }
+function closePal(){ S('#pal').hidden=true; }
+S('#openPal').addEventListener('click',openPal);
+S('#pal').addEventListener('click',function(e){ if(e.target===S('#pal')) closePal(); });
+S('#palIn').addEventListener('input',function(){ renderPal(this.value); });
+S('#palIn').addEventListener('keydown',function(e){
+  var bs=A('#palList button'); if(!bs.length) return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); bs[palIdx].classList.remove('act'); palIdx=(palIdx+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length; bs[palIdx].classList.add('act'); bs[palIdx].scrollIntoView({block:'nearest'}); }
+  if(e.key==='Enter'){ e.preventDefault(); bs[palIdx].click(); }
+});
+
+/* toast */
+var tt; function toast(m){ var t=S('#toast'); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(function(){t.hidden=true},1800); }
+
+/* shortcuts */
+document.addEventListener('keydown',function(e){
+  var mod=e.ctrlKey||e.metaKey, k=e.key.toLowerCase();
+  if(mod&&(k==='k'||k==='p')){ e.preventDefault(); openPal(); }
+  else if(mod&&k==='s'){ e.preventDefault(); toast(tr('Saved')); }
+  else if(mod&&k==='/'){ e.preventDefault(); var t=S('#aiInput1'); if(cur==='viewer'&&t) t.focus(); }
+  else if(e.key==='Escape'){ closePal(); }
+});
+
+/* boot */
+var sl=load('ara-lang'), th=load('ara-theme'); if(sl==='ar') lang='ar'; if(th==='light'||th==='dark') theme=th;
+applyTheme(); applyLang(); go('dashboard');
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+.venv/
+venv/
+env/
+.env
+.env.local
+*.egg-info/
+dist/
+build/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Storage - keep gitkeep but ignore content
+storage/documents/*
+storage/journals/*
+!storage/documents/.gitkeep
+!storage/journals/.gitkeep
+
+# Models (large)
+models/
+*.gguf
+*.bin
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.next/
+frontend/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Ollama
+ollama_data/
+
+# Logs
+logs/
+*.log
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
+
+# Alembic pycache
+alembic/__pycache__/

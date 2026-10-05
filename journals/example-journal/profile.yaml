@@ -1,0 +1,23 @@
+# Example Journal Profile - TEMPLATE
+# Copy this folder to journals/<your-journal-slug>/ and edit.
+name: "Example Journal of Applied Research"
+slug: "example-journal"
+publisher: "Example Publisher"
+issn: "1234-5678"
+official_url: "https://example.com/journal"
+author_guidelines_url: "https://example.com/journal/author-guidelines"
+scope: "Applied interdisciplinary research"
+article_types: ["Research Article", "Review Article"]
+word_limits:
+  research_article: 8000
+  review_article: 10000
+abstract_requirements:
+  max_words: 250
+  structured: true
+reference_style: "APA 7th"
+figure_requirements: "300 DPI, TIFF/PNG"
+table_requirements: "Editable, not images"
+ethics_requirements: "Ethics statement required"
+data_requirements: "Data availability statement required"
+formatting_requirements: "Double-spaced, 12pt"
+submission_requirements: "Cover letter, conflicts disclosure"

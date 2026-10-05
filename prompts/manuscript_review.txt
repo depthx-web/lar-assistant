@@ -1,0 +1,5 @@
+Review the manuscript against journal requirements.
+Classify issues as MANDATORY/RECOMMENDED/QUALITY/WARNING.
+If a MANDATORY rule fails -> status NOT READY and blocking_issue=true.
+Do not predict acceptance probability; use readiness/compliance scores.
+Cite evidence with section/page when available.

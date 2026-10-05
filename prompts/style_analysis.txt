@@ -1,0 +1,3 @@
+Analyze style across multiple papers to infer JOURNAL-LEVEL (not author-level) style.
+Extract: structure, paragraph org, sentence length, terminology, tone, voice, introduction/methods/results/discussion/conclusion style, citation behavior, detail level.
+Do not copy distinctive passages. Generalize.
