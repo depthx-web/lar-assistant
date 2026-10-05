@@ -292,3 +292,9 @@ details.issue .dd dt{color:var(--ink-3)} details.issue .dd dd{margin:0}
   .searchbtn kbd{display:none}
   .thread{max-height:none}
 }
+
+#root{height:100%}
+
+html,body{margin:0;padding:0}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}

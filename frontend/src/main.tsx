@@ -7,6 +7,7 @@ import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./context/ThemeContext";
 import { I18nProvider } from "./context/I18nContext";
 import { ToastProvider } from "./components/ui/Toast";
+import { UIProvider } from "./mockup/UI";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <ThemeProvider>
           <I18nProvider>
             <ToastProvider>
-              <App />
+              <UIProvider>
+                <App />
+              </UIProvider>
             </ToastProvider>
           </I18nProvider>
         </ThemeProvider>
