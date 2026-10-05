@@ -28,7 +28,7 @@ storage/journals/*
 !storage/journals/.gitkeep
 
 # Models (large)
-models/
+/models/
 *.gguf
 *.bin
 
@@ -61,3 +61,6 @@ coverage.xml
 
 # Alembic pycache
 alembic/__pycache__/
+
+# Compiled output from tsc (source is .ts/.tsx)
+frontend/src/**/*.js
